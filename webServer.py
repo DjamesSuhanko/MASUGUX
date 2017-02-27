@@ -26,7 +26,8 @@ html = """<!DOCTYPE html>
             }
         </script>
     </head>
-    <body>
+    <body><div align="center">
+        <table width="50%" border="2" style="border-radius:10px; 2px solid #73AD21"><tbody><tr><th style="border-radius:10px; border: 2px solid #73AD21">
         <h1 style="color: #DF0000; text-shadow: 2px 2px 5px gray;">Interface de controle</h1>
     <br>
     <h3 style="color:white; text-shadow: 2px 2px 4px #000000; font-family:arial">MASUGUX e Do bit Ao Byte</h3>
@@ -40,7 +41,11 @@ html = """<!DOCTYPE html>
               </th>
           </tr>
         </table>
-    </body>
+
+        <!--table><tbody><tr><th><b style="font-family:arial">Estado do relay:</b> "%s" </th></tr></tbody></table-->
+        
+        </th></tr></tbody></div>
+
 </html>
 """
 
