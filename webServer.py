@@ -33,10 +33,10 @@ html = """<!DOCTYPE html>
         <table border="0">
           <tr>
               <th>
-              <button style="border-radius: 5px; border: 2px solid #73AD21; padding 10px; font-family: arial; font-size:30px; color:#73AD21; text-shadow:-1px 0 white, 0 1px white, 1px 0 white, 0 -1px white; box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);" type="button" onclick="turnRelay(ON)">Ligar</button>
+              <button style="border-radius: 5px; border: 2px solid #73AD21; padding 10px; font-size:30px; font-family: arial; color:#73AD21; text-shadow:-1px 0 white, 0 1px white, 1px 0 white, 0 -1px white; box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);" type="button" onclick="turnRelay(ON)">Ligar</button>
               </th>
               <th>
-              <button style="border-radius: 5px; border: 2px solid #DF0000; padding 10px; font-size:30px; color: #DF0000; text-shadow: -1px 0 white, 0 1px white, 1px 0 white, 0 -1px white; box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);" type="button" onclick="turnRelay(OFF)">Desligar</button>
+              <button style="border-radius: 5px; border: 2px solid #DF0000; padding 10px; font-size:30px; font-family: arial; color:#DF0000; text-shadow:-1px 0 white, 0 1px white, 1px 0 white, 0 -1px white; box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);" type="button" onclick="turnRelay(OFF)">Desligar</button>
               </th>
           </tr>
         </table>
