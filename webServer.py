@@ -27,16 +27,16 @@ html = """<!DOCTYPE html>
         </script>
     </head>
     <body>
-        <h1>Interface de controle</h1>
+        <h1 style="color: #DF0000; text-shadow: 2px 2px 5px gray;">Interface de controle</h1>
     <br>
-    <h3>MASUGUX e Do bit Ao Byte</h3>
+    <h3 style="color:white; text-shadow: 2px 2px 4px #000000; font-family:arial">MASUGUX e Do bit Ao Byte</h3>
         <table border="0">
           <tr>
               <th>
-              <button type="button" onclick="turnRelay(ON)">Ligar</button>
+              <button style="border-radius: 5px; border: 2px solid #73AD21; padding 10px; font-family: arial; font-size:30px; color:#73AD21; text-shadow:-1px 0 white, 0 1px white, 1px 0 white, 0 -1px white; box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);" type="button" onclick="turnRelay(ON)">Ligar</button>
               </th>
               <th>
-              <button type="button" onclick="turnRelay(OFF)">Desligar</button>
+              <button style="border-radius: 5px; border: 2px solid #DF0000; padding 10px; font-size:30px; color: #DF0000; text-shadow: -1px 0 white, 0 1px white, 1px 0 white, 0 -1px white; box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);" type="button" onclick="turnRelay(OFF)">Desligar</button>
               </th>
           </tr>
         </table>
@@ -79,6 +79,7 @@ def parse_request(text):
 
 def startServer():
     s  = socket.socket()
+    s.setsockopt(1, 7, 8192)
     ai = socket.getaddrinfo("0.0.0.0", 80)
     print("Bind address info:", ai)
     addr = ai[0][-1]
@@ -102,8 +103,10 @@ def startServer():
                 client_s.send(header)
                 client_s.send(content)
         except:
-            "oh-oh..."
+            print("oh-oh...")
             pass
-            
-        client_s.send(html)
+        try:    
+            client_s.sendall(html)
+        except:
+            pass
         client_s.close()
