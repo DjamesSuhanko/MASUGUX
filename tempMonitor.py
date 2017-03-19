@@ -2,7 +2,7 @@ import time
 
 from umqtt.simple import MQTTClient
 from machine import Pin
-
+import network
 # Publish test messages e.g. with:
 # mosquitto_pub -t foo_topic -m hello
 
@@ -18,7 +18,22 @@ class freezer:
         self.mqtt_passwd  = mqtt_passwd
         self.topic        = topic
         self.mqtt         = MQTTClient(self.bb_mqtt_id,self.mqtt_broker,self.mqtt_port,self.mqtt_user,self.mqtt_passwd)
+        self.sta_if       = network.WLAN(network.STA_IF)
+
+        self.programs     = {"fermentation":[18.0,22.0],"maturation":[0.0,2.0],"priming":[23.0,25.0]}
+
+        self.MINIMUM      = self.programs["fermentation"][0]
+        self.MAXIMUM      = self.programs["fermentation"][1]
         
+        print("Waiting IP...")
+        size = 0
+        while size < 11:
+          try:
+            size = len(self.sta_if.ifconfig()[0])
+            time.sleep_ms(80)
+          except:
+            size = 0
+
         self.mqtt.connect()
 
     def doSleep(self):
@@ -46,15 +61,23 @@ class freezer:
                 
     # Received messages from subscriptions will be delivered to this callback
     def sub_cb(self,topic, msg):
-        temp = self.toNumber(msg)
         print((topic, msg))
-        if temp > 22.5:
-            self.relay_one.high()
-            print("relay ON")
+
+        if topic == b'beer/program':
+            temp = str(msg)
+            if temp in self.programs.keys():
+                self.MINIMAL = programs[step][0]
+                self.MAXIMUM = programs[step][1]
+                
+        elif topic == b'beer/temperature':
+            temp = self.toNumber(msg)
+            if temp > self.MAXIMUM:
+                self.relay_one.high()
+                print("relay ON")
             
-        elif temp < 18.0:
-            print("relay OFF")
-            self.relay_one.low()
+            elif temp < self.MINIMUM:
+                print("relay OFF")
+                self.relay_one.low()
 
     def check(self,server="192.168.1.2"):
         print("Connecting...")
@@ -62,7 +85,7 @@ class freezer:
         self.mqtt.set_callback(self.sub_cb)
         #self.mqtt.connect()
         print("Subscribe to beer/temperature...")
-        self.mqtt.subscribe(b"beer/temperature")
+        self.mqtt.subscribe(b"beer/#")
         while True:
             if True:
                 # Blocking wait for message
