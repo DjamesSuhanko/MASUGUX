@@ -21,6 +21,7 @@ class freezer:
         self.sta_if       = network.WLAN(network.STA_IF)
 
         self.programs     = {b'fermentation':[18.0,22.0],b'maturation':[0.0,2.0],b'priming':[23.0,25.0]}
+temp
         self.MINIMUM      = self.programs[b'fermentation'][0]
         self.MAXIMUM      = self.programs[b'fermentation'][1]
         
@@ -63,7 +64,7 @@ class freezer:
         print((topic, msg))
 
         if topic == b'beer/program':
-            if msg in self.programs.keys():
+            if temp in self.programs.keys():
                 self.MINIMAL = self.programs[msg][0]
                 self.MAXIMUM = self.programs[msg][1]
                 print("Programa escolhido:")
