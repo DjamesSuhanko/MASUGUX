@@ -1,8 +1,14 @@
 import time
 
 from umqtt.simple import MQTTClient
+
 from machine import Pin
+from machine import reset
+
 import network
+
+from os import listdir
+from os import remove
 
 
 # Publish test messages e.g. with:
@@ -23,9 +29,13 @@ class freezer:
         self.mqtt = MQTTClient(self.bb_mqtt_id, self.mqtt_broker, self.mqtt_port, self.mqtt_user, self.mqtt_passwd)
         self.sta_if = network.WLAN(network.STA_IF)
 
-        self.programs = {b'fermentation': [18.0, 22.0], b'maturation': [0.0, 2.0], b'priming': [23.0, 25.0]}
-        self.MINIMUM = self.programs[b'fermentation'][0]
-        self.MAXIMUM = self.programs[b'fermentation'][1]
+        self.programs = {'fermentation': [18.0, 22.0], 'maturation': [0.0, 2.0], 'priming': [20.0, 23.0]}
+
+        self.style = 'fermentation'
+        self.programLoad()
+
+        self.MINIMUM = self.programs[self.style][0]
+        self.MAXIMUM = self.programs[self.style][1]
 
         self.relay_status = "OFF"
 
@@ -40,6 +50,42 @@ class freezer:
 
         self.mqtt.connect()
 
+    def programLoad(self):
+        prog = listdir(".")
+        if not "program.ini" in prog:
+            print("Arquivo de programa nao existe")
+        else:
+            f = open("program.ini","r")
+            self.style = f.read()
+            f.close()
+
+            self.MINIMUM = self.programs[self.style][0]
+            self.MAXIMUM = self.programs[self.style][1]
+
+            print("Programa carregado:")
+            print(self.style)
+            print("Minima:")
+            print(self.MINIMUM)
+            print("Maxima:")
+            print(self.MAXIMUM)
+
+    def defineProgram(self,programTo):
+        progFile = listdir(".")
+        if "program.ini" in progFile:
+            remove("program.ini")
+
+        f = open("program.ini","w")
+
+        if type(programTo) is bytes:
+            value = programTo.decode()
+        else:
+            value = programTo
+
+        f.write(value)
+        f.close()
+
+        self.programLoad()
+
     def ts2name(self):
         val = str(time.localtime())
         return val
@@ -51,6 +97,8 @@ class freezer:
         f.write(messages)
         f.close()
 
+        reset()
+
     def doSleep(self):
         try:
             #diz ao esp monitor para dormir, apos ter recebido a mensagem
@@ -59,7 +107,6 @@ class freezer:
         except:
             print("Nao foi possivel conectar ao broker")
             self.log("Nao foi possivel fazer publish\r\n ")
-            return
 
     def toNumber(self, target):
         try:
@@ -77,7 +124,6 @@ class freezer:
 
         except:
             self.log("Falha no calculo da temperatura")
-            return 0.0
 
         self.doSleep()
         return temp
@@ -91,11 +137,12 @@ class freezer:
 
         try:
             if topic == b'beer/program':
-                if msg in self.programs.keys():
-                    self.MINIMAL = self.programs[msg][0]
-                    self.MAXIMUM = self.programs[msg][1]
-                    print("Programa escolhido:")
-                    print(msg)
+                if msg.decode() in self.programs.keys():
+                    self.defineProgram(msg)
+                    #self.MINIMUM = self.programs[msg][0]
+                    #self.MAXIMUM = self.programs[msg][1]
+                    #print("Programa escolhido:")
+                    #print(msg)
 
             elif topic == b'beer/temperature':
                 temp = self.toNumber(msg)
@@ -113,8 +160,6 @@ class freezer:
 
         except:
             self.log("Falha no callback\r\n ")
-            return
-
 
     def check(self, server="192.168.1.2"):
         print("Connecting...")
@@ -123,25 +168,23 @@ class freezer:
             self.mqtt.set_callback(self.sub_cb)
         except:
             self.log("Falha em set_callback")
-            return
 
         # self.mqtt.connect()
         print("Subscribe to beer/temperature...")
         self.mqtt.subscribe(b"beer/#")
         while True:
             try:
-                #if True:
-                #    # Blocking wait for message
-                #    self.mqtt.wait_msg()
-                #else:
                 if True:
+                    # Blocking wait for message
+                    self.mqtt.wait_msg()
+                else:
                     # Non-blocking wait for message
                     self.mqtt.check_msg()
                     # Then need to sleep to avoid 100% CPU usage (in a real
                     # app other useful actions would be performed instead)
-                    time.sleep(1)
+                    time.sleep_ms(1)
             except:
                 self.log("Falha no mqtt.wait_msg ou mqtt.check_msg\r\n ")
-                return
+            time.sleep_ms(1)
 
         self.mqtt.disconnect()
